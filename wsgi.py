@@ -1,10 +1,12 @@
 from flask import Flask
+from routes import register_routes
+from config import get_config
 
 app = Flask(__name__)
+config = get_config()
 
-@app.route("/")
-def hello_world():
-    return "<p>Hello, World!</p>"
+register_routes(app)
+
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=8080, debug=True)
+    app.run(host=config.HOST, port=config.PORT, debug=config.DEBUG)
