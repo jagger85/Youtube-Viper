@@ -1,9 +1,10 @@
 import redis
+import os
 
-# Initialize the Redis client with default values
+# Initialize the Redis client with environment-aware configuration
 redis_client = redis.StrictRedis(
-    host='localhost',  # Default host
-    port=6379,         # Default port
-    db=0,              # Default database
+    host=os.getenv('REDIS_HOST', 'redis'),  # Use 'redis' service name in Docker, fallback to 'redis'
+    port=int(os.getenv('REDIS_PORT', 6379)),  # Default Redis port
+    db=int(os.getenv('REDIS_DB', 0)),        # Default database
     decode_responses=True
 )
