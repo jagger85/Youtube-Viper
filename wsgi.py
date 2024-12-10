@@ -1,12 +1,9 @@
-from flask import Flask
-from routes import register_routes
-from config import get_config
+from app.config import get_config
+from app import create_app
 
-app = Flask(__name__)
 config = get_config()
 
-register_routes(app)
-
+app = create_app()
 
 if __name__ == "__main__":
     app.run(host=config.HOST, port=config.PORT, debug=config.DEBUG)
