@@ -19,7 +19,7 @@ def index():
         task = test_task.delay(uuid.uuid4(), client_id)
         
     # Wait for the task to complete and get the result
-    result = task.get(timeout=360)  # Adjust timeout as needed
+    result = task.get(timeout=1000)  # Adjust timeout as needed
     
     # Return the result as a JSON response
     return jsonify({"result": result})
