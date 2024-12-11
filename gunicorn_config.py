@@ -2,7 +2,7 @@ import multiprocessing
 import os
 
 # Number of worker processes
-workers = multiprocessing.cpu_count() * 2 + 1
+workers = min(multiprocessing.cpu_count() * 2 + 1, 8) 
 
 # Host and port - Always bind to 0.0.0.0 to listen on all interfaces
 bind = f"0.0.0.0:{os.getenv('PORT', '8000')}"
