@@ -2,6 +2,8 @@ import time
 from app.celery_app import celery
 from constants.speecher_task_status import SpeecherTaskStatus
 from app.redis import redis_client
+from .audio_downloader import download_audio
+from .speech_recognition import transcribe_audio
 import json
 
 @celery.task
@@ -11,19 +13,19 @@ def test_task(task_id, client_id):
     
     redis_client.set(f"speecher task id:{task_id}", SpeecherTaskStatus.PENDING.value)
     send_message(client_id, {'task_id': task_id, 'status': SpeecherTaskStatus.PENDING.value})
-    time.sleep(1)
 
     redis_client.set(f"speecher task id:{task_id}", SpeecherTaskStatus.DOWNLOADING.value)
     send_message(client_id, {'task_id': task_id, 'status': SpeecherTaskStatus.DOWNLOADING.value})
-    time.sleep(2)
+    audio_file_path = download_audio("https://www.youtube.com/watch?v=lGLvocUQxpY")
 
     redis_client.set(f"speecher task id:{task_id}", SpeecherTaskStatus.TRANSCRIBING.value)
     send_message(client_id, {'task_id': task_id, 'status': SpeecherTaskStatus.TRANSCRIBING.value})
-    time.sleep(2)
+    transcribed_text = transcribe_audio(audio_file_path)
+    print(transcribed_text)
 
-    redis_client.set(f"speecher task id:{task_id}", SpeecherTaskStatus.PROCESSING.value)
-    send_message(client_id, {'task_id': task_id, 'status': SpeecherTaskStatus.PROCESSING.value})
-    time.sleep(2)
+    # redis_client.set(f"speecher task id:{task_id}", SpeecherTaskStatus.PROCESSING.value)
+    # send_message(client_id, {'task_id': task_id, 'status': SpeecherTaskStatus.PROCESSING.value})
+    # time.sleep(2)
 
     redis_client.set(f"speecher task id:{task_id}", SpeecherTaskStatus.COMPLETED.value)
     return "Task completed"
