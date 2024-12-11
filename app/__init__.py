@@ -3,12 +3,32 @@ from routes import register_routes
 from .config import get_config, Config
 from flask_jwt_extended import JWTManager
 from flask_sock import Sock
+from services import FileManager
+
+
+import logging
+
+logger = logging.getLogger(__name__)
+
+def create_temp_dir():
+    file_manager = FileManager()
+    temp_dir = file_manager.create_temp_dir()
+    logger.info(f"Created temporary directory: {temp_dir}")
+    return temp_dir
+    
 
 def create_app():
     app = Flask(__name__)
+    
     config = get_config()
+    
     jwt = JWTManager(app)
+    
+    temp_dir = create_temp_dir()
+    app.config["TEMP_DIR"] = temp_dir
+
     app.config["JWT_SECRET_KEY"] = Config().JWT_SECRET_KEY
+    
     app.config.update(
         CELERY_BROKER_URL=Config().CELERY_BROKER_URL,
         CELERY_RESULT_BACKEND=Config().CELERY_RESULT_BACKEND
