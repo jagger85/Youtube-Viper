@@ -4,6 +4,7 @@ from .config import get_config, Config
 from flask_jwt_extended import JWTManager
 from flask_sock import Sock
 from services import FileManager
+from flask_cors import CORS
 
 
 import logging
@@ -19,7 +20,7 @@ def create_temp_dir():
 
 def create_app():
     app = Flask(__name__)
-    
+    CORS(app)
     config = get_config()
     
     jwt = JWTManager(app)
@@ -28,6 +29,7 @@ def create_app():
     app.config["TEMP_DIR"] = temp_dir
 
     app.config["JWT_SECRET_KEY"] = Config().JWT_SECRET_KEY
+    app.config["JWT_ACCESS_TOKEN_EXPIRES"] = False
     
     app.config.update(
         CELERY_BROKER_URL=Config().CELERY_BROKER_URL,
