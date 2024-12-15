@@ -1,34 +1,37 @@
 import time
 from app.celery_app import celery
 from constants.speecher_task_status import SpeecherTaskStatus
+from constants.message_types import MessageType
 from app.redis import redis_client
 from .audio_downloader import download_audio
 from .speech_recognition import transcribe_audio
 import json
 
 @celery.task
-def test_task(task_id, client_id):
+def test_task(task_id, client_id, video_url):
     # Convert UUID to string if it's a UUID object
     task_id = str(task_id)
+    result = None 
     
     redis_client.set(f"speecher task id:{task_id}", SpeecherTaskStatus.PENDING.value)
-    send_message(client_id, {'task_id': task_id, 'status': SpeecherTaskStatus.PENDING.value})
+    send_message(client_id, {'task_id': task_id, 'status': SpeecherTaskStatus.PENDING.value, 'type': MessageType.OPERATION_STATUS.value})
 
     redis_client.set(f"speecher task id:{task_id}", SpeecherTaskStatus.DOWNLOADING.value)
-    send_message(client_id, {'task_id': task_id, 'status': SpeecherTaskStatus.DOWNLOADING.value})
-    audio_file_path = download_audio("https://www.youtube.com/watch?v=lGLvocUQxpY")
+    send_message(client_id, {'task_id': task_id, 'status': SpeecherTaskStatus.DOWNLOADING.value, 'type': MessageType.OPERATION_STATUS.value})
+    audio_file_path = download_audio(video_url)
 
     redis_client.set(f"speecher task id:{task_id}", SpeecherTaskStatus.TRANSCRIBING.value)
-    send_message(client_id, {'task_id': task_id, 'status': SpeecherTaskStatus.TRANSCRIBING.value})
+    send_message(client_id, {'task_id': task_id, 'status': SpeecherTaskStatus.TRANSCRIBING.value, 'type': MessageType.OPERATION_STATUS.value})
     transcribed_text = transcribe_audio(audio_file_path)
-    print(transcribed_text)
+    result = transcribed_text
 
     # redis_client.set(f"speecher task id:{task_id}", SpeecherTaskStatus.PROCESSING.value)
-    # send_message(client_id, {'task_id': task_id, 'status': SpeecherTaskStatus.PROCESSING.value})
+    # send_message(client_id, {'task_id': task_id, 'status': SpeecherTaskStatus.PROCESSING.value, 'type': MessageType.OPERATION_STATUS.value})
     # time.sleep(2)
 
     redis_client.set(f"speecher task id:{task_id}", SpeecherTaskStatus.COMPLETED.value)
-    return "Task completed"
+    send_message(client_id, {'task_id': task_id, 'status': SpeecherTaskStatus.COMPLETED.value, 'type': MessageType.OPERATION_STATUS.value})
+    return result
 
 def send_message(client_id, message):
     print(f"Sending message to client {client_id}: {message}")
