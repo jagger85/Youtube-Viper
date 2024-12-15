@@ -1,6 +1,8 @@
 from flask_sock import Sock
 import uuid
 from app.redis import redis_client
+from constants import MessageType
+
 import json
 
 def register_sock_routes(app):
@@ -11,7 +13,10 @@ def register_sock_routes(app):
         client_id = str(uuid.uuid4())
         redis_client.set(f"client:{client_id}", "connected")
         print(f"Client {client_id} connected")
-        ws.send(f"Welcome to the server, your client ID is {client_id}")
+        ws.send(json.dumps({
+            "type": MessageType.LOGIN.value,
+            "client_id": client_id
+        }))
         
         # Subscribe to a Redis channel for this client
         pubsub = redis_client.pubsub()
