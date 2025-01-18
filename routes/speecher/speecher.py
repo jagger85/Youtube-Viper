@@ -25,6 +25,5 @@ def index():
     # Wait for the task to complete and get the result
     result = task.get(timeout=3000)  # Adjust timeout as needed
     
-    # Return the result as a JSON response
+    
     return jsonify({"result": result})
-

@@ -1,0 +1,17 @@
+services:
+  web:
+    build:
+      context: .
+    command: flask run --host=0.0.0.0 --port=8000
+    environment:
+      - FLASK_ENV=development
+      - FLASK_DEBUG=1
+
+  celery_worker:
+    build:
+      context: .
+    environment:
+      - FLASK_ENV=development
+      - FLASK_DEBUG=1
+
+

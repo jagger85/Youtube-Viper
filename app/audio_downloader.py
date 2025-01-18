@@ -6,7 +6,7 @@ from services import FileManager, FileContext
 
 logger = logging.getLogger(__name__)
 
-def download_audio(url: str):
+def download_audio(url: str, cookies: str = None):
     file_manager = FileManager()
     
     # Ensure temp directory exists
@@ -32,6 +32,7 @@ def download_audio(url: str):
         'verbose': False,
         'quiet': False,
         'no_warnings': False,
+        'cookiefile': cookies,
     }
 
     try:

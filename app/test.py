@@ -5,6 +5,7 @@ from constants.message_types import MessageType
 from app.redis import redis_client
 from .audio_downloader import download_audio
 from .speech_recognition import transcribe_audio
+from .brain import summarize_long_text
 import json
 
 @celery.task
@@ -23,15 +24,14 @@ def test_task(task_id, client_id, video_url):
     redis_client.set(f"speecher task id:{task_id}", SpeecherTaskStatus.TRANSCRIBING.value)
     send_message(client_id, {'task_id': task_id, 'status': SpeecherTaskStatus.TRANSCRIBING.value, 'type': MessageType.OPERATION_STATUS.value})
     transcribed_text = transcribe_audio(audio_file_path)
-    result = transcribed_text
 
-    # redis_client.set(f"speecher task id:{task_id}", SpeecherTaskStatus.PROCESSING.value)
-    # send_message(client_id, {'task_id': task_id, 'status': SpeecherTaskStatus.PROCESSING.value, 'type': MessageType.OPERATION_STATUS.value})
-    # time.sleep(2)
+   # redis_client.set(f"speecher task id:{task_id}", SpeecherTaskStatus.PROCESSING.value)
+   # send_message(client_id, {'task_id': task_id, 'status': SpeecherTaskStatus.PROCESSING.value, 'type': MessageType.OPERATION_STATUS.value})
+   # result = summarize_long_text(transcribed_text)
 
     redis_client.set(f"speecher task id:{task_id}", SpeecherTaskStatus.COMPLETED.value)
     send_message(client_id, {'task_id': task_id, 'status': SpeecherTaskStatus.COMPLETED.value, 'type': MessageType.OPERATION_STATUS.value})
-    return result
+    return transcribed_text
 
 def send_message(client_id, message):
     print(f"Sending message to client {client_id}: {message}")
