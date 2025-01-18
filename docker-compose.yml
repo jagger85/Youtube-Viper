@@ -1,0 +1,52 @@
+services:
+  web:
+    image: jagger85/speecher:flask-app
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+    environment:
+      - LOGIN_USER=${LOGIN_USER}
+      - LOGIN_PASSWORD=${LOGIN_PASSWORD}
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
+      - CELERY_BROKER_URL=redis://default:${REDIS_PASSWORD}@redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://default:${REDIS_PASSWORD}@redis:6379/0
+    depends_on:
+      - redis
+    networks:
+      - app-network
+
+  celery_worker:
+    image: jagger85/speecher:celery-worker
+    command: celery -A app.celery_worker.celery worker --loglevel=info
+    volumes:
+      - .:/app
+    environment:
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
+      - CELERY_BROKER_URL=redis://default:${REDIS_PASSWORD}@redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://default:${REDIS_PASSWORD}@redis:6379/0
+    depends_on:
+      - redis
+    networks:
+      - app-network
+
+  redis:
+    image: redis/redis-stack:latest
+    ports:
+      - "6379:6379"
+      - "8001:8001"
+    networks:
+      - app-network
+    volumes:
+      - redis-data:/data
+    environment:
+      - REDIS_ARGS=--requirepass ${REDIS_PASSWORD}
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+    
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  redis-data:
