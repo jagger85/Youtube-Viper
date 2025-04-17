@@ -1,9 +1,11 @@
-import requests
 import os
+from openai import OpenAI
 import textwrap
 
-API_URL = "https://api-inference.huggingface.co/models/facebook/bart-large-cnn"
-headers = {"Authorization": f'Bearer {os.getenv("HUGGING_FACE_KEY")}'}
+client = OpenAI(
+    api_key=os.getenv("MODEL_API_KEY"),
+    base_url=os.getenv("MODEL_API_URL")
+)
 
 def chunk_text(text, max_chunk_size=1000, overlap=100):
     """
@@ -23,45 +25,27 @@ def chunk_text(text, max_chunk_size=1000, overlap=100):
         chunks.append(chunk)
     return chunks
 
-def summarize_chunk(chunk):
+def summarize_chunk(chunk, prompt):
     """
-    Summarize an individual text chunk
-    
-    Args:
-    - chunk (str): Text chunk to summarize
-    
-    Returns:
-    Summarized text or None if error
+    Summarize an individual text chunk using the llm
     """
     try:
-        payload = {
-            "inputs": chunk,
-            "max_length": 1000,
-            "min_length": 30,
-            "length_penalty": 2.0,
-            "num_beams": 4,
-            "do_sample": False
-        }
-        
-        response = requests.post(API_URL, headers=headers, json=payload)
-        response.raise_for_status()
-        
-        result = response.json()
-        
-        # Handle different response formats
-        if isinstance(result, list) and result and 'summary_text' in result[0]:
-            return result[0]['summary_text']
-        elif isinstance(result, dict) and 'summary_text' in result:
-            return result['summary_text']
-        else:
-            print("Unexpected response format")
-            return None
+        completion = client.chat.completions.create(
+            model=os.getenv("LLM_MODEL"),
+            messages=[
+                {"role": "system", "content": prompt},
+                {"role": "user", "content": chunk}
+            ],
+            temperature=0.7,
+            max_tokens=1000
+        )
+        return completion.choices[0].message.content
     
     except Exception as e:
         print(f"Error summarizing chunk: {e}")
         return None
 
-def summarize_long_text(text):
+def summarize_long_text(text, prompt):
     """
     Summarize a long text by breaking it into chunks
     
@@ -77,21 +61,16 @@ def summarize_long_text(text):
     # Summarize each chunk
     chunk_summaries = []
     for chunk in chunks:
-        summary = summarize_chunk(chunk)
+        summary = summarize_chunk(chunk, prompt)
         if summary:
             chunk_summaries.append(summary)
     
     # If multiple chunk summaries, create a final summary
     if len(chunk_summaries) > 1:
         final_combined_text = " ".join(chunk_summaries)
-        final_summary = summarize_chunk(final_combined_text)
+        final_summary = summarize_chunk(final_combined_text, prompt)
         return final_summary or " ".join(chunk_summaries)
     elif chunk_summaries:
         return chunk_summaries[0]
     else:
         return "Could not generate summary"
-
-# # Example usage
-# long_text = """Your very long text goes here..."""
-# comprehensive_summary = summarize_long_text(long_text)
-# print(comprehensive_summary)

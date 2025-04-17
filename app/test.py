@@ -9,29 +9,36 @@ from .brain import summarize_long_text
 import json
 
 @celery.task
-def test_task(task_id, client_id, video_url):
-    # Convert UUID to string if it's a UUID object
-    task_id = str(task_id)
-    result = None 
-    
-    redis_client.set(f"speecher task id:{task_id}", SpeecherTaskStatus.PENDING.value)
-    send_message(client_id, {'task_id': task_id, 'status': SpeecherTaskStatus.PENDING.value, 'type': MessageType.OPERATION_STATUS.value})
+def test_task(task_id, client_id, video_url, prompt):
 
-    redis_client.set(f"speecher task id:{task_id}", SpeecherTaskStatus.DOWNLOADING.value)
-    send_message(client_id, {'task_id': task_id, 'status': SpeecherTaskStatus.DOWNLOADING.value, 'type': MessageType.OPERATION_STATUS.value})
-    audio_file_path = download_audio(video_url)
+    try:
+        # Convert UUID to string if it's a UUID object
+        task_id = str(task_id)
+        result = None 
+        
+        redis_client.set(f"speecher task id:{task_id}", SpeecherTaskStatus.PENDING.value)
+        send_message(client_id, {'task_id': task_id, 'status': SpeecherTaskStatus.PENDING.value, 'type': MessageType.OPERATION_STATUS.value})
 
-    redis_client.set(f"speecher task id:{task_id}", SpeecherTaskStatus.TRANSCRIBING.value)
-    send_message(client_id, {'task_id': task_id, 'status': SpeecherTaskStatus.TRANSCRIBING.value, 'type': MessageType.OPERATION_STATUS.value})
-    transcribed_text = transcribe_audio(audio_file_path)
+        redis_client.set(f"speecher task id:{task_id}", SpeecherTaskStatus.DOWNLOADING.value)
+        send_message(client_id, {'task_id': task_id, 'status': SpeecherTaskStatus.DOWNLOADING.value, 'type': MessageType.OPERATION_STATUS.value})
+        audio_file_path = download_audio(video_url)
 
-   # redis_client.set(f"speecher task id:{task_id}", SpeecherTaskStatus.PROCESSING.value)
-   # send_message(client_id, {'task_id': task_id, 'status': SpeecherTaskStatus.PROCESSING.value, 'type': MessageType.OPERATION_STATUS.value})
-   # result = summarize_long_text(transcribed_text)
+        redis_client.set(f"speecher task id:{task_id}", SpeecherTaskStatus.TRANSCRIBING.value)
+        send_message(client_id, {'task_id': task_id, 'status': SpeecherTaskStatus.TRANSCRIBING.value, 'type': MessageType.OPERATION_STATUS.value})
+        transcribed_text = transcribe_audio(audio_file_path)
 
-    redis_client.set(f"speecher task id:{task_id}", SpeecherTaskStatus.COMPLETED.value)
-    send_message(client_id, {'task_id': task_id, 'status': SpeecherTaskStatus.COMPLETED.value, 'type': MessageType.OPERATION_STATUS.value})
-    return transcribed_text
+        redis_client.set(f"speecher task id:{task_id}", SpeecherTaskStatus.PROCESSING.value)
+        send_message(client_id, {'task_id': task_id, 'status': SpeecherTaskStatus.PROCESSING.value, 'type': MessageType.OPERATION_STATUS.value})
+        result = summarize_long_text(transcribed_text, prompt)
+
+        redis_client.set(f"speecher task id:{task_id}", SpeecherTaskStatus.COMPLETED.value)
+        send_message(client_id, {'task_id': task_id, 'status': SpeecherTaskStatus.COMPLETED.value, 'type': MessageType.OPERATION_STATUS.value})
+        return result
+
+    except Exception as e:
+        redis_client.set(f"speecher task id:{task_id}", SpeecherTaskStatus.FAILED.value)
+        send_message(client_id, {'task_id': task_id, 'status': e, 'type': MessageType.OPERATION_STATUS.value})
+        return str(e)
 
 def send_message(client_id, message):
     print(f"Sending message to client {client_id}: {message}")
