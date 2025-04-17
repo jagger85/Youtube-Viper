@@ -18,9 +18,11 @@ def index():
     else:
         client_id = request.args.get("client_id")
         video_url = request.args.get("video_url")
+        prompt = request.args.get("prompt")
         task_id = uuid.uuid4()
+
         # Start the task
-        task = test_task.delay(task_id, client_id, video_url)
+        task = test_task.delay(task_id, client_id, video_url, prompt)
         
     # Wait for the task to complete and get the result
     result = task.get(timeout=3000)  # Adjust timeout as needed
