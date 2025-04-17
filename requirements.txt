@@ -58,3 +58,4 @@ wsproto==1.2.0
 yt-dlp==2024.12.6
 zope.event==5.0
 zope.interface==7.2
+openai
