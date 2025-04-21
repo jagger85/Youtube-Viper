@@ -19,7 +19,7 @@ WORKDIR /app
 COPY requirements.txt .
 
 # Install dependencies
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install -r requirements.txt
 
 # Final stage
 FROM python:3.11-slim AS final
@@ -45,3 +45,4 @@ COPY . .
 # Create a non-root user and switch to it
 RUN useradd -m appuser && chown -R appuser:appuser /app
 USER appuser
+
