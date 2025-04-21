@@ -7,7 +7,7 @@ client = OpenAI(
     base_url=os.getenv("MODEL_API_URL")
 )
 
-def chunk_text(text, max_chunk_size=1000, overlap=100):
+def chunk_text(text:str, max_chunk_size=1000, overlap=100):
     """
     Split text into manageable chunks with optional overlap
     
@@ -25,7 +25,7 @@ def chunk_text(text, max_chunk_size=1000, overlap=100):
         chunks.append(chunk)
     return chunks
 
-def summarize_chunk(chunk, prompt):
+def summarize_chunk(chunk:str, prompt:str) -> str:
     """
     Summarize an individual text chunk using the llm
     """
@@ -45,12 +45,14 @@ def summarize_chunk(chunk, prompt):
         print(f"Error summarizing chunk: {e}")
         return None
 
-def summarize_long_text(text, prompt):
+def summarize_long_text(text:str, prompt="Summarize this text") -> str:
     """
-    Summarize a long text by breaking it into chunks
+    Process text with a given a prompt
+    `summarize this text` is the default prompt in case is not provided
     
     Args:
     - text (str): Long input text
+    - prompt (str): The user prompt
     
     Returns:
     Comprehensive summary of the entire text
