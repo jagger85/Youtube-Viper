@@ -1,0 +1,267 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "description": "This API provides an end-to-end solution for processing Youtube videos by extracting their audio, transcribing the audio into text, and sending the transcribed text to a language model for further processing based on user-defined prompts.\n\n <b>Workflow Overview:</b>\n1. Video Upload: The user uploads a video file via the API.\n2. Audio Extraction: The server extracts the audio track from the uploaded video.\n3. Transcription: The extracted audio is transcribed into text using a speech-to-text service.\n4. Language Model Processing: The transcribed text is sent to a language model (e.g., GPT) along with a user-defined prompt for advanced processing or analysis.\n5. Response: The processed output from the language model is returned to the user.\n\n<b>Use Cases:</b>\n- Generate summaries of video content.\n- Extract key insights or themes from spoken content.\n- Perform sentiment analysis on video transcripts.\n- Answer specific questions about the video's content.\n\n<b>How to use: </b>\n\nTo run the application, you need to set the following environment variables in a `.env` file located in the project root folder:\n\n- **JWT_SECRET_KEY**: _Secret key used for JWT authentication._\n- **LOGIN_USER**: _Username for logging into the application._\n- **LOGIN_PASSWORD**: _Password for the specified login user._\n- **CELERY_BROKER_URL**: _URL for the Celery message broker (e.g., Redis)._ \n- **CELERY_RESULT_BACKEND**: _URL for the Celery result backend (e.g., Redis)._ \n- **REDIS_PASSWORD**: _Password for accessing the Redis instance._\n- **MODEL_API_KEY**: _API key for accessing the language model service._\n- **MODEL_API_URL**: _URL for the language model API._\n- **LLM_MODEL**: _The specific language model to use for processing.",
+        "version": "1.0.0",
+        "title": "Speecher API",
+        "contact": {
+            "email": "andresfonsortega@yahoo.es"
+        }
+    },
+    "servers": [
+        {
+            "url": "/",
+            "description": "Local development server"
+        }
+    ],
+    "components": {
+        "securitySchemes": {
+            "bearerAuth": {
+                "type": "http",
+                "scheme": "bearer",
+                "bearerFormat": "JWT"
+            }
+        },
+        "schemas": {
+            "Error": {
+                "type": "object",
+                "properties": {
+                    "error": {
+                        "type": "string"
+                    }
+                }
+            },
+            "LoginRequest": {
+                "type": "object",
+                "required": [
+                    "username",
+                    "password"
+                ],
+                "properties": {
+                    "username": {
+                        "type": "string",
+                        "description": "Username for authentication"
+                    },
+                    "password": {
+                        "type": "string",
+                        "description": "Password for authentication",
+                        "format": "password"
+                    }
+                }
+            },
+            "LoginResponse": {
+                "type": "object",
+                "properties": {
+                    "access_token": {
+                        "type": "string",
+                        "description": "JWT token for API authentication"
+                    }
+                }
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Authentication",
+            "description": "Authentication endpoints"
+        },
+        {
+            "name": "Health",
+            "description": "Health check endpoints"
+        },
+        {
+            "name": "Speecher",
+            "description": "Speech processing endpoints"
+        },
+        {
+            "name": "WebSocket",
+            "description": "WebSocket communication endpoints"
+        }
+    ],
+    "paths": {
+        "/api/health": {
+            "get": {
+                "tags": [
+                    "Health"
+                ],
+                "summary": "Health check endpoint",
+                "description": "Use this endpoint to check if the service is up and running",
+                "operationId": "checkHealth",
+                "responses": {
+                    "200": {
+                        "description": "Service is healthy",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "ok"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/login": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Login to get access token",
+                "description": "Authenticate with username and password to receive a JWT token",
+                "operationId": "login",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/LoginRequest"
+                            },
+                            "example": {
+                                "username": "user123",
+                                "password": "password123"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successfully authenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/LoginResponse"
+                                },
+                                "example": {
+                                    "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Invalid credentials",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Invalid credentials"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/speecher": {
+            "get": {
+                "tags": [
+                    "Speecher"
+                ],
+                "summary": "Process speech in a video",
+                "description": "Submit a video URL for speech processing with optional prompt",
+                "operationId": "processSpeech",
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "client_id",
+                        "in": "query",
+                        "required": false,
+                        "description": "Unique client identifier to receive real-time updates through the web socket connection",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "video_url",
+                        "in": "query",
+                        "required": true,
+                        "description": "Youtube video URL to process",
+                        "schema": {
+                            "type": "string",
+                            "format": "uri"
+                        }
+                    },
+                    {
+                        "name": "prompt",
+                        "in": "query",
+                        "required": false,
+                        "description": "Optional prompt for speech processing",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Speech processing completed successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "result": {
+                                            "type": "object",
+                                            "description": "Processing result"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request - missing required parameters",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                },
+                                "example": {
+                                    "error": "client_id is required"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized - Invalid or missing token",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/echo": {
+            "get": {
+                "tags": [
+                    "WebSocket"
+                ],
+                "summary": "WebSocket connection endpoint",
+                "description": "A WebSocket connection for real-time updates, when connected the server will send the unique client identifier where you can subscribe for real-time processing updates",
+                "operationId": "wsConnect",
+                "responses": {
+                    "101": {
+                        "description": "WebSocket connection established"
+                    }
+                }
+            }
+        }
+    }
+}
