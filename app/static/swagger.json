@@ -1,9 +1,53 @@
 {
     "openapi": "3.0.0",
     "info": {
-        "description": "This API provides an end-to-end solution for processing Youtube videos by extracting their audio, transcribing the audio into text, and sending the transcribed text to a language model for further processing based on user-defined prompts.\n\n <b>Workflow Overview:</b>\n1. Video Upload: The user uploads a video file via the API.\n2. Audio Extraction: The server extracts the audio track from the uploaded video.\n3. Transcription: The extracted audio is transcribed into text using a speech-to-text service.\n4. Language Model Processing: The transcribed text is sent to a language model (e.g., GPT) along with a user-defined prompt for advanced processing or analysis.\n5. Response: The processed output from the language model is returned to the user.\n\n<b>Use Cases:</b>\n- Generate summaries of video content.\n- Extract key insights or themes from spoken content.\n- Perform sentiment analysis on video transcripts.\n- Answer specific questions about the video's content.\n\n<b>How to use: </b>\n\nTo run the application, you need to set the following environment variables in a `.env` file located in the project root folder:\n\n- **JWT_SECRET_KEY**: _Secret key used for JWT authentication._\n- **LOGIN_USER**: _Username for logging into the application._\n- **LOGIN_PASSWORD**: _Password for the specified login user._\n- **CELERY_BROKER_URL**: _URL for the Celery message broker (e.g., Redis)._ \n- **CELERY_RESULT_BACKEND**: _URL for the Celery result backend (e.g., Redis)._ \n- **REDIS_PASSWORD**: _Password for accessing the Redis instance._\n- **MODEL_API_KEY**: _API key for accessing the language model service._\n- **MODEL_API_URL**: _URL for the language model API._\n- **LLM_MODEL**: _The specific language model to use for processing.",
-        "version": "1.0.0",
-        "title": "Speecher API",
+        "description": "This API provides an end-to-end solution for processing Youtube videos by extracting their audio, transcribing the audio into text, and sending the transcribed text to a language model for further processing based on user-defined prompts.\n\n
+        <b>Workflow Overview:</b>\n
+        1. Video Upload: The user uploads a video file via the API.\n
+        2. Audio Extraction: The server extracts the audio track from the uploaded video.\n
+        3. Transcription: The extracted audio is transcribed into text using a speech-to-text service.\n
+        4. Language Model Processing: The transcribed text is sent to a language model (e.g., GPT) along with a user-defined prompt for advanced processing or analysis.\n
+        5. Response: The processed output from the language model is returned to the user.\n\n
+
+        <b>Step-by-Step Integration Guide:</b>\n
+        1. <u>Authentication</u>\n
+           - First, obtain your access token by making a POST request to `/api/login`\n
+           - Use your username and password in the request body\n
+           - Store the returned JWT token for subsequent requests\n\n
+        
+        2. <u>WebSocket Connection (for Real-time Updates)</u>\n
+           - Connect to the WebSocket endpoint at `/echo`\n
+           - Upon connection, you'll receive a unique client_id\n
+           - Use this client_id for real time updates\n\n
+        
+        3. <u>Process a Video</u>\n
+           - Make a GET request to `/api/speecher`\n
+           - Include your JWT token in the Authorization header as 'Bearer <token>'\n
+           - Required parameters:\n
+             * video_url: Your YouTube video URL\n
+           - Optional parameters:\n
+             * client_id: The ID received from WebSocket connection\n
+             * prompt: Custom instructions for processing the transcript\n\n
+        
+        4. <u>Receiving Results</u>\n
+           - Real-time updates will be sent through the WebSocket connection\n
+           - Final results will be returned in the API response\n\n
+
+        <b>Use Cases:</b>\n
+        - Generate summaries of video content\n
+        - Extract key insights or themes from spoken content\n
+        - Perform sentiment analysis on video transcripts\n
+        - Answer specific questions about the video's content\n\n
+
+        <b>Environment Setup:</b>\n
+        To run the application, you need to set the following environment variables in a `.env` file located in the project root folder:\n\n
+        - **JWT_SECRET_KEY**: _Secret key used for JWT authentication._\n
+        - **LOGIN_USER**: _Username for logging into the application._\n
+        - **LOGIN_PASSWORD**: _Password for the specified login user._\n
+        - **REDIS_PASSWORD**: _Password for accessing the Redis instance._\n
+        - **MODEL_API_KEY**: _API key for accessing the language model service._\n
+        - **MODEL_API_URL**: _URL for the language model API._\n
+        - **LLM_MODEL**: _The specific language model to use for processing._","version": "1.0.0","title": "Speecher API",
         "contact": {
             "email": "andresfonsortega@yahoo.es"
         }
