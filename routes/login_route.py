@@ -7,7 +7,6 @@ load_dotenv()
 
 bp_login = Blueprint("login", __name__)
 
-
 @bp_login.route("/api/login", methods=["POST"])
 def login():
     username = request.json.get("username")

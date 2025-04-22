@@ -9,7 +9,7 @@ from .brain import summarize_long_text
 import json
 
 @celery.task
-def test_task(task_id, client_id, video_url, prompt):
+def video_process_task(task_id, client_id, video_url, prompt):
 
     try:
         # Convert UUID to string if it's a UUID object
