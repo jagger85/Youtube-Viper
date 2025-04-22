@@ -16,7 +16,10 @@ def index():
     else:
         client_id = request.args.get("client_id")
         video_url = request.args.get("video_url")
-        prompt = request.args.get("prompt")
+        if request.args.get("prompt"):
+            prompt = request.args.get("prompt")
+        else:
+            prompt = "Summarize the text in no more than 10 words"
         task_id = uuid.uuid4()
 
         # Start the task

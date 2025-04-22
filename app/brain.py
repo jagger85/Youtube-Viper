@@ -45,7 +45,7 @@ def summarize_chunk(chunk:str, prompt:str) -> str:
         print(f"Error summarizing chunk: {e}")
         return None
 
-def summarize_long_text(text:str, prompt="Summarize this text") -> str:
+def summarize_long_text(text:str, prompt:str) -> str:
     """
     Process text with a given a prompt
     `summarize this text` is the default prompt in case is not provided
