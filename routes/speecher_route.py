@@ -16,6 +16,8 @@ def index():
     else:
         client_id = request.args.get("client_id")
         video_url = request.args.get("video_url")
+        operation_type = request.args.get("operation_type")
+                
         if request.args.get("prompt"):
             prompt = request.args.get("prompt")
         else:
@@ -23,7 +25,7 @@ def index():
         task_id = uuid.uuid4()
 
         # Start the task
-        task = video_process_task.delay(task_id, client_id, video_url, prompt)
+        task = video_process_task.delay(task_id, client_id, video_url, prompt, operation_type)
         
     # Wait for the task to complete and get the result
     result = task.get(timeout=3000)

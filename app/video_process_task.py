@@ -9,7 +9,7 @@ from .brain import summarize_long_text
 import json
 
 @celery.task
-def video_process_task(task_id, client_id, video_url, prompt):
+def video_process_task(task_id, client_id, video_url, prompt, operation_type):
 
     try:
         # Convert UUID to string if it's a UUID object
@@ -27,13 +27,19 @@ def video_process_task(task_id, client_id, video_url, prompt):
         send_message(client_id, {'task_id': task_id, 'status': SpeecherTaskStatus.TRANSCRIBING.value, 'type': MessageType.OPERATION_STATUS.value})
         transcribed_text = transcribe_audio(audio_file_path)
 
-        redis_client.set(f"speecher task id:{task_id}", SpeecherTaskStatus.PROCESSING.value)
-        send_message(client_id, {'task_id': task_id, 'status': SpeecherTaskStatus.PROCESSING.value, 'type': MessageType.OPERATION_STATUS.value})
-        result = summarize_long_text(transcribed_text, prompt)
+        if(operation_type == 'transcribe'):
+            redis_client.set(f"speecher task id:{task_id}", SpeecherTaskStatus.COMPLETED.value)
+            send_message(client_id, {'task_id': task_id, 'status': SpeecherTaskStatus.COMPLETED.value, 'type': MessageType.OPERATION_STATUS.value})
+            return transcribed_text
+        
+        else:
+            redis_client.set(f"speecher task id:{task_id}", SpeecherTaskStatus.PROCESSING.value)
+            send_message(client_id, {'task_id': task_id, 'status': SpeecherTaskStatus.PROCESSING.value, 'type': MessageType.OPERATION_STATUS.value})
+            result = summarize_long_text(transcribed_text, prompt)
 
-        redis_client.set(f"speecher task id:{task_id}", SpeecherTaskStatus.COMPLETED.value)
-        send_message(client_id, {'task_id': task_id, 'status': SpeecherTaskStatus.COMPLETED.value, 'type': MessageType.OPERATION_STATUS.value})
-        return result
+            redis_client.set(f"speecher task id:{task_id}", SpeecherTaskStatus.COMPLETED.value)
+            send_message(client_id, {'task_id': task_id, 'status': SpeecherTaskStatus.COMPLETED.value, 'type': MessageType.OPERATION_STATUS.value})
+            return result
 
     except Exception as e:
         redis_client.set(f"speecher task id:{task_id}", SpeecherTaskStatus.FAILED.value)

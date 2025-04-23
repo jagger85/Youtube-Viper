@@ -247,6 +247,14 @@
                         "schema": {
                             "type": "string"
                         }
+                    },                    {
+                        "name": "operation_type",
+                        "in": "query",
+                        "required": true,
+                        "description": "Define if transcribe the audio only or process it with an llm",
+                        "schema": {
+                            "type": "string"
+                        }
                     }
                 ],
                 "responses": {
