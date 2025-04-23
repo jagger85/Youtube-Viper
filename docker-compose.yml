@@ -1,6 +1,6 @@
 services:
   web:
-    image: jagger85/speecher:flask-app
+    image: jagger85/youtube-viper:flask-server
     ports:
       - "8000:8000"
     volumes:
@@ -17,7 +17,7 @@ services:
       - app-network
 
   celery_worker:
-    image: jagger85/speecher:celery-worker
+    image: jagger85/youtube-viper:celery-worker
     command: celery -A app.celery_worker.celery worker --loglevel=info
     volumes:
       - .:/app
