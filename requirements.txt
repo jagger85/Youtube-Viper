@@ -1,7 +1,6 @@
 celery
 Flask
 Flask-Cors
-Flask-JWT-Extended
 flask-sock
 openai
 openai-whisper

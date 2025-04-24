@@ -5,9 +5,6 @@ load_dotenv()
 
 
 class Config:
-    @property
-    def JWT_SECRET_KEY(self):
-        return os.getenv("JWT_SECRET_KEY")
 
     @property
     def CELERY_BROKER_URL(self):
