@@ -106,3 +106,6 @@ http://127.0.0.1:8000
 This address will redirect you to the swagger api documentation,
 there you will find a detailed guide to use the api.
 
+🚀 Want a more user-friendly experience? Check out our sleek UI companion app! It provides an intuitive interface for all these features, making video analysis a breeze. Get started at:
+https://github.com/jagger85/Youtube-Viper-UI
+
