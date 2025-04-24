@@ -10,26 +10,21 @@
         5. Response: The processed output from the language model is returned to the user.\n\n
 
         <b>Step-by-Step Integration Guide:</b>\n
-        1. <u>Authentication</u>\n
-           - First, obtain your access token by making a POST request to `/api/login`\n
-           - Use your username and password in the request body\n
-           - Store the returned JWT token for subsequent requests\n\n
-        
-        2. <u>WebSocket Connection (for Real-time Updates)</u>\n
+
+        1. <u>WebSocket Connection (for Real-time Updates)</u>\n
            - Connect to the WebSocket endpoint at `/echo`\n
            - Upon connection, you'll receive a unique client_id\n
            - Use this client_id for real time updates\n\n
         
-        3. <u>Process a Video</u>\n
+        2. <u>Process a Video</u>\n
            - Make a GET request to `/api/speecher`\n
-           - Include your JWT token in the Authorization header as 'Bearer <token>'\n
            - Required parameters:\n
              * video_url: Your YouTube video URL\n
            - Optional parameters:\n
              * client_id: The ID received from WebSocket connection\n
              * prompt: Custom instructions for processing the transcript\n\n
         
-        4. <u>Receiving Results</u>\n
+        3. <u>Receiving Results</u>\n
            - Real-time updates will be sent through the WebSocket connection\n
            - Final results will be returned in the API response\n\n
 
@@ -41,9 +36,6 @@
 
         <b>Environment Setup:</b>\n
         To run the application, you need to set the following environment variables in a `.env` file located in the project root folder:\n\n
-        - **JWT_SECRET_KEY**: _Secret key used for JWT authentication._\n
-        - **LOGIN_USER**: _Username for logging into the application._\n
-        - **LOGIN_PASSWORD**: _Password for the specified login user._\n
         - **REDIS_PASSWORD**: _Password for accessing the Redis instance._\n
         - **MODEL_API_KEY**: _API key for accessing the language model service._\n
         - **MODEL_API_URL**: _URL for the language model API._\n
@@ -58,57 +50,7 @@
             "description": "Local development server"
         }
     ],
-    "components": {
-        "securitySchemes": {
-            "bearerAuth": {
-                "type": "http",
-                "scheme": "bearer",
-                "bearerFormat": "JWT"
-            }
-        },
-        "schemas": {
-            "Error": {
-                "type": "object",
-                "properties": {
-                    "error": {
-                        "type": "string"
-                    }
-                }
-            },
-            "LoginRequest": {
-                "type": "object",
-                "required": [
-                    "username",
-                    "password"
-                ],
-                "properties": {
-                    "username": {
-                        "type": "string",
-                        "description": "Username for authentication"
-                    },
-                    "password": {
-                        "type": "string",
-                        "description": "Password for authentication",
-                        "format": "password"
-                    }
-                }
-            },
-            "LoginResponse": {
-                "type": "object",
-                "properties": {
-                    "access_token": {
-                        "type": "string",
-                        "description": "JWT token for API authentication"
-                    }
-                }
-            }
-        }
-    },
     "tags": [
-        {
-            "name": "Authentication",
-            "description": "Authentication endpoints"
-        },
         {
             "name": "Health",
             "description": "Health check endpoints"
@@ -151,61 +93,6 @@
                 }
             }
         },
-        "/api/login": {
-            "post": {
-                "tags": [
-                    "Authentication"
-                ],
-                "summary": "Login to get access token",
-                "description": "Authenticate with username and password to receive a JWT token",
-                "operationId": "login",
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "$ref": "#/components/schemas/LoginRequest"
-                            },
-                            "example": {
-                                "username": "user123",
-                                "password": "password123"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "description": "Successfully authenticated",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/LoginResponse"
-                                },
-                                "example": {
-                                    "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
-                                }
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Invalid credentials",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Invalid credentials"
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        },
         "/api/speecher": {
             "get": {
                 "tags": [
@@ -214,11 +101,6 @@
                 "summary": "Process speech in a video",
                 "description": "Submit a video URL for speech processing with optional prompt",
                 "operationId": "processSpeech",
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ],
                 "parameters": [
                     {
                         "name": "client_id",
@@ -287,16 +169,6 @@
                             }
                         }
                     },
-                    "401": {
-                        "description": "Unauthorized - Invalid or missing token",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Error"
-                                }
-                            }
-                        }
-                    }
                 }
             }
         },

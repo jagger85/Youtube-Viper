@@ -61,11 +61,7 @@ Hey, if you’re reading this and thinking, “Wow, this person sounds like they
 
 To run this project, you will need to add the following environment variables to your `.env` file:
 
-- **`JWT_SECRET_KEY`**: A secret key used to sign and verify JSON Web Tokens (JWT) for securing authentication. 
 
-- **`LOGIN_USER`**: The username required for basic authentication to access the API.
-
-- **`LOGIN_PASSWORD`**: The password required for basic authentication to access the API.
 
 - **`REDIS_PASSWORD`**: The password for your Redis instance.
 

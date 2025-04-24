@@ -6,9 +6,6 @@ services:
     volumes:
       - .:/app
     environment:
-      - LOGIN_USER=${LOGIN_USER}
-      - LOGIN_PASSWORD=${LOGIN_PASSWORD}
-      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
       - CELERY_BROKER_URL=redis://default:${REDIS_PASSWORD}@redis:6379/0
       - CELERY_RESULT_BACKEND=redis://default:${REDIS_PASSWORD}@redis:6379/0
     depends_on:
@@ -22,7 +19,6 @@ services:
     volumes:
       - .:/app
     environment:
-      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
       - CELERY_BROKER_URL=redis://default:${REDIS_PASSWORD}@redis:6379/0
       - CELERY_RESULT_BACKEND=redis://default:${REDIS_PASSWORD}@redis:6379/0
     depends_on:
