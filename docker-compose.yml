@@ -8,6 +8,10 @@ services:
     environment:
       - CELERY_BROKER_URL=redis://default:${REDIS_PASSWORD}@redis:6379/0
       - CELERY_RESULT_BACKEND=redis://default:${REDIS_PASSWORD}@redis:6379/0
+      - MODEL_API_KEY=${MODEL_API_KEY}
+      - MODEL_API_URL=${MODEL_API_URL}
+      - LLM_MODEL=${LLM_MODEL}
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
     depends_on:
       - redis
     networks:
@@ -21,6 +25,10 @@ services:
     environment:
       - CELERY_BROKER_URL=redis://default:${REDIS_PASSWORD}@redis:6379/0
       - CELERY_RESULT_BACKEND=redis://default:${REDIS_PASSWORD}@redis:6379/0
+      - MODEL_API_KEY=${MODEL_API_KEY}
+      - MODEL_API_URL=${MODEL_API_URL}
+      - LLM_MODEL=${LLM_MODEL}
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
     depends_on:
       - redis
     networks:
